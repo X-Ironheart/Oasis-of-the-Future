@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useLayoutEffect } from 'react';
+import { useMemo, useRef, useState, useLayoutEffect, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html } from '@react-three/drei';
@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { teamMembers, supervisor } from '../data/team';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { CanvasLoader } from '../components/CanvasLoader';
 
 // ==========================================
 // 1. Procedural Textures (Memory Optimized)
@@ -509,6 +510,26 @@ function HighFidelityScene({ isRaining }: { isRaining: boolean }) {
         <meshStandardMaterial map={textures.grass} roughness={1} />
       </mesh>
 
+      {/* Interaction Areas with Labels */}
+      {/* 1. Renewables (Solar & Wind) */}
+      <mesh position={[-9, 0, -5]} visible={false} onClick={() => { setActiveSector('renewables'); scrollToSector('renewables-info'); }}>
+        <boxGeometry args={[12, 10, 10]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
+      
+      {/* ... other interaction areas ... */}
+      <mesh position={[8, 0, -2]} visible={false} onClick={() => { setActiveSector('water'); scrollToSector('water-info'); }}>
+        <boxGeometry args={[8, 10, 10]} />
+      </mesh>
+      
+      <mesh position={[8, 0, 8]} visible={false} onClick={() => { setActiveSector('agriculture'); scrollToSector('agriculture-info'); }}>
+        <boxGeometry args={[8, 10, 10]} />
+      </mesh>
+      
+      <mesh position={[-6, 0, 8]} visible={false} onClick={() => { setActiveSector('biogas'); scrollToSector('biogas-info'); }}>
+        <boxGeometry args={[10, 10, 10]} />
+      </mesh>
+
       {/* 1. Realistic Procedural Desert Zone (Top Right Triangle) */}
       <group position={[8, 0, -2]}>
         <RealisticDunes position={[0, 0, 0]} />
@@ -610,6 +631,7 @@ export default function Home() {
         {/* React Three Fiber Canvas */}
         <div className={`w-full h-full cursor-grab active:cursor-grabbing transition-colors duration-1000 ${isRaining ? 'bg-slate-300' : 'bg-[#f0f9ff]'}`}>
           <Canvas shadows dpr={[1, 2]} camera={{ position: [-5, 18, 30], fov: 40 }}>
+            <Suspense fallback={<CanvasLoader />}>
             {/* Atmospheric Depth */}
             <fog attach="fog" args={[isRaining ? '#94a3b8' : '#e0f2fe', 30, 80]} />
             <color attach="background" args={[isRaining ? '#94a3b8' : '#e0f2fe']} />
@@ -656,6 +678,7 @@ export default function Home() {
             />
             
             <HighFidelityScene isRaining={isRaining} />
+            </Suspense>
           </Canvas>
         </div>
 

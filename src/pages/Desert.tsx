@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useRef, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { CanvasLoader } from '../components/CanvasLoader';
 
 // --- 3D Components ---
 function WoodenSign({ position, text }: { position: [number, number, number]; text: string }) {
@@ -224,13 +225,15 @@ export default function Desert() {
 
         <div className="w-full h-full">
           <Canvas shadows camera={{ position: [0, 10, 18], fov: 42 }} dpr={[1, 1.5]} gl={{ powerPreference: 'high-performance' }}>
+            <Suspense fallback={<CanvasLoader />}>
             <color attach="background" args={['#78350f']} />
             <ambientLight intensity={0.8} />
             <hemisphereLight intensity={0.5} color="#fde68a" groundColor="#78350f" />
             <directionalLight castShadow position={[10, 16, 5]} intensity={2} shadow-mapSize={[512, 512]} />
             <OrbitControls autoRotate autoRotateSpeed={0.4} maxPolarAngle={Math.PI / 2.2} minDistance={8} maxDistance={30} target={[0, -1, 0]} />
             <DesertScene />
-            <ContactShadows position={[0, -1.25, 0]} opacity={0.6} scale={12} blur={2} far={4} color="#78350f" />
+            <ContactShadows position={[0, -1.25, 0]} opacity={0.6} scale={25} blur={2.5} far={4} color="#78350f" />
+            </Suspense>
           </Canvas>
         </div>
 

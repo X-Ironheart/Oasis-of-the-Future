@@ -1,10 +1,11 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, Suspense } from 'react';
 import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html, Environment } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { CanvasLoader } from '../components/CanvasLoader';
 
 // --- 3D Components ---
 function WoodenSign({ position, text }: { position: [number, number, number]; text: string }) {
@@ -623,6 +624,7 @@ export default function Water() {
 
         <div className="w-full h-full">
           <Canvas shadows camera={{ position: [0, 10, 16], fov: 40 }}>
+            <Suspense fallback={<CanvasLoader />}>
             <color attach="background" args={['#0c4a6e']} />
             <ambientLight intensity={0.5} />
             <directionalLight castShadow position={[5, 15, 5]} intensity={2} shadow-mapSize={[2048, 2048]} />
@@ -631,6 +633,7 @@ export default function Water() {
             <OrbitControls autoRotate autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 2.2} minDistance={8} maxDistance={28} target={[0, -1, 0]} />
             <WaterScene />
             <ContactShadows position={[0, -1.25, 0]} opacity={0.5} scale={22} blur={2} far={4} color="#0c4a6e" />
+            </Suspense>
           </Canvas>
         </div>
 

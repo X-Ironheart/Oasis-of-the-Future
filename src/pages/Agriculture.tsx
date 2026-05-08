@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useRef, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html, Environment } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { CanvasLoader } from '../components/CanvasLoader';
 
 // --- 3D Components ---
 function WoodenSign({ position, text }: { position: [number, number, number]; text: string }) {
@@ -263,14 +264,16 @@ export default function Agriculture() {
         {/* 3D Canvas */}
         <div className="w-full h-full">
           <Canvas shadows camera={{ position: [0, 10, 14], fov: 38 }}>
-            <color attach="background" args={['#052e16']} />
-            <ambientLight intensity={0.6} />
-            <directionalLight castShadow position={[8, 14, 5]} intensity={2} shadow-mapSize={[2048, 2048]} />
-            <pointLight position={[-5, 5, -5]} color="#bbf7d0" intensity={1.5} />
-            <Environment preset="forest" />
-            <OrbitControls autoRotate autoRotateSpeed={0.4} maxPolarAngle={Math.PI / 2.2} minDistance={7} maxDistance={25} target={[0, -1, 0]} />
-            <AgricultureScene />
-            <ContactShadows position={[0, -1.25, 0]} opacity={0.5} scale={20} blur={2} far={4} color="#052e16" />
+            <Suspense fallback={<CanvasLoader />}>
+              <color attach="background" args={['#052e16']} />
+              <ambientLight intensity={0.6} />
+              <directionalLight castShadow position={[8, 14, 5]} intensity={2} shadow-mapSize={[2048, 2048]} />
+              <pointLight position={[-5, 5, -5]} color="#bbf7d0" intensity={1.5} />
+              <Environment preset="forest" />
+              <OrbitControls autoRotate autoRotateSpeed={0.4} maxPolarAngle={Math.PI / 2.2} minDistance={7} maxDistance={25} target={[0, -1, 0]} />
+              <AgricultureScene />
+              <ContactShadows position={[0, -1.25, 0]} opacity={0.5} scale={20} blur={2} far={4} color="#052e16" />
+            </Suspense>
           </Canvas>
         </div>
 

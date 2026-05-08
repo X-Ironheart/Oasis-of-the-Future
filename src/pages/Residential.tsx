@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { CanvasLoader } from '../components/CanvasLoader';
 import * as THREE from 'three';
 
 // --- 3D Components ---
@@ -355,6 +356,7 @@ export default function Residential() {
             dpr={[1, 1.5]} 
             gl={{ powerPreference: 'high-performance', antialias: false }}
           >
+            <Suspense fallback={<CanvasLoader />}>
             <color attach="background" args={['#0f172a']} />
             <fog attach="fog" args={['#0f172a', 15, 40]} />
             
@@ -384,6 +386,7 @@ export default function Residential() {
             />
             <ResidentialScene />
             <ContactShadows position={[0, -1.25, 0]} opacity={0.5} scale={18} blur={1.5} far={4} color="#020617" />
+            </Suspense>
           </Canvas>
         </div>
 

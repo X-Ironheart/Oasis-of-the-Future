@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html, Environment } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { CanvasLoader } from '../components/CanvasLoader';
 
 // --- 3D Components ---
 function WoodenSign({ position, text }: { position: [number, number, number]; text: string }) {
@@ -304,14 +305,16 @@ export default function Animal() {
 
         <div className="w-full h-full">
           <Canvas shadows camera={{ position: [0, 10, 16], fov: 40 }}>
-            <color attach="background" args={['#451a03']} />
-            <ambientLight intensity={0.5} />
-            <directionalLight castShadow position={[8, 14, 5]} intensity={2} shadow-mapSize={[2048, 2048]} />
-            <pointLight position={[0, 5, 5]} color="#fbbf24" intensity={1.5} />
-            <Environment preset="sunset" />
-            <OrbitControls autoRotate autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 2.2} minDistance={8} maxDistance={28} target={[0, -1, 0]} />
-            <AnimalZoneScene />
-            <ContactShadows position={[0, -1.25, 0]} opacity={0.5} scale={22} blur={2.5} far={4} color="#451a03" />
+            <Suspense fallback={<CanvasLoader />}>
+              <color attach="background" args={['#451a03']} />
+              <ambientLight intensity={0.5} />
+              <directionalLight castShadow position={[8, 14, 5]} intensity={2} shadow-mapSize={[2048, 2048]} />
+              <pointLight position={[0, 5, 5]} color="#fbbf24" intensity={1.5} />
+              <Environment preset="sunset" />
+              <OrbitControls autoRotate autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 2.2} minDistance={8} maxDistance={28} target={[0, -1, 0]} />
+              <AnimalZoneScene />
+              <ContactShadows position={[0, -1.25, 0]} opacity={0.5} scale={22} blur={2.5} far={4} color="#451a03" />
+            </Suspense>
           </Canvas>
         </div>
 
