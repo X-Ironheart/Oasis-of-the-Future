@@ -3,7 +3,7 @@ import { Leaf } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function CanvasLoader() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   
   return (

@@ -510,25 +510,6 @@ function HighFidelityScene({ isRaining }: { isRaining: boolean }) {
         <meshStandardMaterial map={textures.grass} roughness={1} />
       </mesh>
 
-      {/* Interaction Areas with Labels */}
-      {/* 1. Renewables (Solar & Wind) */}
-      <mesh position={[-9, 0, -5]} visible={false} onClick={() => { setActiveSector('renewables'); scrollToSector('renewables-info'); }}>
-        <boxGeometry args={[12, 10, 10]} />
-        <meshBasicMaterial color="red" />
-      </mesh>
-      
-      {/* ... other interaction areas ... */}
-      <mesh position={[8, 0, -2]} visible={false} onClick={() => { setActiveSector('water'); scrollToSector('water-info'); }}>
-        <boxGeometry args={[8, 10, 10]} />
-      </mesh>
-      
-      <mesh position={[8, 0, 8]} visible={false} onClick={() => { setActiveSector('agriculture'); scrollToSector('agriculture-info'); }}>
-        <boxGeometry args={[8, 10, 10]} />
-      </mesh>
-      
-      <mesh position={[-6, 0, 8]} visible={false} onClick={() => { setActiveSector('biogas'); scrollToSector('biogas-info'); }}>
-        <boxGeometry args={[10, 10, 10]} />
-      </mesh>
 
       {/* 1. Realistic Procedural Desert Zone (Top Right Triangle) */}
       <group position={[8, 0, -2]}>
