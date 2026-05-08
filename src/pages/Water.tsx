@@ -118,14 +118,14 @@ function SolarPump({ position }: { position: [number, number, number] }) {
         </mesh>
         {/* Cooling Fins */}
         {[-0.3, -0.15, 0, 0.15, 0.3].map(z => (
-          <mesh key={`fin-${z}`} position={[0, 0, z]} castShadow>
-             <cylinderGeometry args={[0.28, 0.28, 0.02, 16]} rotation={[Math.PI/2, 0, 0]} />
+          <mesh key={`fin-${z}`} position={[0, 0, z]} rotation={[Math.PI/2, 0, 0]} castShadow>
+             <cylinderGeometry args={[0.28, 0.28, 0.02, 16]} />
              <meshStandardMaterial color="#334155" metalness={0.8} />
           </mesh>
         ))}
         {/* Pump Head */}
-        <mesh position={[0, 0, 0.5]} castShadow>
-           <cylinderGeometry args={[0.3, 0.3, 0.3, 16]} rotation={[Math.PI/2, 0, 0]} />
+        <mesh position={[0, 0, 0.5]} rotation={[Math.PI/2, 0, 0]} castShadow>
+           <cylinderGeometry args={[0.3, 0.3, 0.3, 16]} />
            <meshStandardMaterial color="#0ea5e9" metalness={0.5} roughness={0.5} />
         </mesh>
       </group>
@@ -230,7 +230,7 @@ function RainwaterTank({ position }: { position: [number, number, number] }) {
           </mesh>
         ))}
         {/* Floating indicator */}
-        <mesh position={[0.03, -0.2, 0]}>
+        <mesh position={[0.03, -0.2, 0]} rotation={[0, 0, Math.PI/2]}>
            <cylinderGeometry args={[0.03, 0.03, 0.1, 8]} />
            <meshStandardMaterial color="#f59e0b" metalness={0.5} />
         </mesh>
@@ -287,8 +287,8 @@ function FarmArea({ position }: { position: [number, number, number] }) {
           ))}
           
           {/* Irrigation Pipe */}
-          <mesh position={[0, 0.15, 0.3]} castShadow>
-            <cylinderGeometry args={[0.03, 0.03, 4.4, 8]} rotation={[0, 0, Math.PI / 2]} />
+          <mesh position={[0, 0.15, 0.3]} rotation={[0, 0, Math.PI / 2]} castShadow>
+            <cylinderGeometry args={[0.03, 0.03, 4.4, 8]} />
             <meshStandardMaterial color="#334155" roughness={0.7} />
           </mesh>
           {/* Drip emitters / water puddles */}
@@ -420,7 +420,8 @@ function RainParticles() {
   }, [count]);
 
   useFrame(() => {
-    if (!meshRef.current) return;
+    const instancedMesh = meshRef.current;
+    if (!instancedMesh) return;
     particles.forEach((particle, i) => {
       particle.y -= particle.speed;
       particle.x -= particle.speed * 0.15; // Wind effect X
@@ -440,9 +441,9 @@ function RainParticles() {
       dummy.rotation.x = -0.05;
       
       dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+      instancedMesh.setMatrixAt(i, dummy.matrix);
     });
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    instancedMesh.instanceMatrix.needsUpdate = true;
   });
 
   return (

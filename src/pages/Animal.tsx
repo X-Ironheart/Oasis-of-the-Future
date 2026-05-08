@@ -99,7 +99,7 @@ function Sheep({ position }: { position: [number, number, number] }) {
 }
 
 function BiodigesterReactor({ position }: { position: [number, number, number] }) {
-  const gasRef = useRef<any>();
+  const gasRef = useRef<any>(null);
   useFrame(({ clock }) => {
     if (gasRef.current) {
       gasRef.current.scale.y = 1 + Math.sin(clock.elapsedTime * 1.5) * 0.1;

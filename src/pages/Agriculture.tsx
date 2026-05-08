@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html, Environment } from '@react-three/drei';
@@ -27,7 +27,7 @@ function WoodenSign({ position, text }: { position: [number, number, number]; te
 }
 
 function PalmTree({ position }: { position: [number, number, number] }) {
-  const swayRef = useRef<any>();
+  const swayRef = useRef<any>(null);
   useFrame(({ clock }) => {
     if (swayRef.current) {
       swayRef.current.rotation.z = Math.sin(clock.elapsedTime * 0.5) * 0.05;
@@ -57,7 +57,7 @@ function PalmTree({ position }: { position: [number, number, number] }) {
 }
 
 function Vegetable({ position }: { position: [number, number, number] }) {
-  const growRef = useRef<any>();
+  const growRef = useRef<any>(null);
   useFrame(({ clock }) => {
     if (growRef.current) {
       growRef.current.scale.y = 0.9 + Math.sin(clock.elapsedTime * 0.8 + position[0]) * 0.1;
@@ -134,7 +134,7 @@ function IrrigationPipe({ from, to, isBlue = false }: { from: [number, number, n
 }
 
 function WaterTankSmall() {
-  const waterRef = useRef<any>();
+  const waterRef = useRef<any>(null);
   useFrame(({ clock }) => {
     if (waterRef.current) {
       waterRef.current.material.opacity = 0.7 + Math.sin(clock.elapsedTime) * 0.15;

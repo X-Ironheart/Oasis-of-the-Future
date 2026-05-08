@@ -1,10 +1,10 @@
-import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
+import { useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { teamMembers, supervisor } from '../data/team';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 // ==========================================

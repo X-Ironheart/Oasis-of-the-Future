@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Html } from '@react-three/drei';
@@ -27,7 +27,7 @@ function WoodenSign({ position, text }: { position: [number, number, number]; te
 }
 
 function WindTurbine({ position, speed = 0.04 }: { position: [number, number, number]; speed?: number }) {
-  const bladesRef = useRef<any>();
+  const bladesRef = useRef<any>(null);
   useFrame(() => {
     if (bladesRef.current) bladesRef.current.rotation.z -= speed;
   });
