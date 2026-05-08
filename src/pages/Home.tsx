@@ -128,6 +128,7 @@ function RealisticDunes({ position }: { position: [number, number, number] }) {
         
         posAttribute.setXYZ(i, v.x, v.y, v.z);
       }
+      posAttribute.needsUpdate = true;
       geomRef.current.computeVertexNormals();
     }
   }, []);
@@ -351,19 +352,17 @@ function AgriculturalZone({ position, textures, type = 'crops' }: any) {
         <group position={[0, 0.1, 0]}>
           {[-1, 0, 1].map(x => [-1.5, 0, 1.5].map(z => (
             <group key={`${x}-${z}`} position={[x + (Math.random()-0.5)*0.2, 0, z + (Math.random()-0.5)*0.2]}>
-              {/* Trunk */}
-              {[0,1,2,3,4,5,6].map(i => (
-                <mesh key={i} position={[0, i * 0.2 + 0.1, 0]} castShadow>
-                  <cylinderGeometry args={[0.08 - (i*0.006), 0.09 - (i*0.006), 0.22, 9]} />
-                  <meshStandardMaterial color="#5c4033" roughness={1} />
-                </mesh>
-              ))}
-              {/* Fronds */}
-              <group position={[0, 1.4, 0]}>
-                {[0,1,2,3,4,5,6,7].map(i => (
-                  <mesh key={i} rotation={[0, (i * Math.PI * 2) / 8, 0]} castShadow>
-                    <mesh rotation={[0.8, 0, 0]} position={[0, 0.1, 0.5]}>
-                      <sphereGeometry args={[0.1, 16, 8]} scale={[1, 0.5, 7]} />
+              {/* Optimized Trunk */}
+              <mesh position={[0, 0.4, 0]} castShadow>
+                <cylinderGeometry args={[0.04, 0.08, 0.8, 6]} />
+                <meshStandardMaterial color="#5c4033" roughness={1} />
+              </mesh>
+              {/* Optimized Fronds */}
+              <group position={[0, 0.8, 0]}>
+                {[0,1,2,3,4].map(i => (
+                  <mesh key={i} rotation={[0, (i * Math.PI * 2) / 5, 0]} castShadow>
+                    <mesh rotation={[0.8, 0, 0]} position={[0, 0.05, 0.3]}>
+                      <sphereGeometry args={[0.1, 8, 4]} scale={[1, 0.2, 5]} />
                       <meshStandardMaterial color="#15803d" roughness={0.8} />
                     </mesh>
                   </mesh>
@@ -437,10 +436,10 @@ function RealisticDirtRoad({ points, width = 0.4 }: { points: THREE.Vector3[], w
 
 // Rain System using InstancedMesh for 60 FPS performance
 function RainSystem({ isRaining }: { isRaining: boolean }) {
-  const dropGeom = useMemo(() => new THREE.BoxGeometry(0.02, 0.5, 0.02), []);
-  const dropMat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#7dd3fc', transparent: true, opacity: 0.6 }), []);
+  const dropGeom = useMemo(() => new THREE.BoxGeometry(0.03, 0.8, 0.03), []);
+  const dropMat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#7dd3fc', transparent: true, opacity: 0.5 }), []);
   const dropsRef = useRef<THREE.InstancedMesh>(null);
-  const count = 2000;
+  const count = 500; // Reduced from 2000 for massive mobile performance boost
   
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const speeds = useMemo(() => new Float32Array(count).map(() => 0.2 + Math.random() * 0.3), []);
@@ -642,8 +641,8 @@ export default function Home() {
             
             <Environment preset={isRaining ? "night" : "sunset"} />
             
-            {/* Ground Ambient Occlusion (Contact Shadows) */}
-            {!isRaining && <ContactShadows position={[0, -0.01, 0]} resolution={1024} scale={50} blur={2.5} opacity={0.6} far={10} color="#064e3b" />}
+            {/* Ground Ambient Occlusion (Contact Shadows) - Only ONE instance to prevent WebGL crash */}
+            {!isRaining && <ContactShadows position={[0, -0.01, 0]} resolution={512} scale={50} blur={2} opacity={0.6} far={10} color="#064e3b" />}
             
             <OrbitControls 
               autoRotate={!isRaining} 
@@ -657,9 +656,6 @@ export default function Home() {
             />
             
             <HighFidelityScene isRaining={isRaining} />
-            
-            {/* Soft ground shadow for realism */}
-            <ContactShadows position={[0, -1.26, 0]} opacity={0.7} scale={40} blur={2.5} far={4} color="#064e3b" />
           </Canvas>
         </div>
 
