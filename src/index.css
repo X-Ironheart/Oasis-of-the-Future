@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    /* Prevent horizontal scrolling on mobile devices */
+    overflow-x: hidden;
+    width: 100%;
+    /* Fluid typography baseline: 14px on mobile, scales with vw, caps at 16px */
+    font-size: clamp(14px, 1.5vw, 16px);
+    /* Improve touch interactions */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure media respects constraints */
+  img, video, canvas {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+
+@layer base {
+  body {
+    @apply bg-cream text-gray-900 font-cairo;
+    direction: ltr; /* Handled dynamically by i18n later */
+  }
+}
