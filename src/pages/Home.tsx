@@ -664,7 +664,7 @@ export default function Home() {
         </div>
 
         {/* Map Legend UI */}
-        <div className="absolute bottom-8 right-8 bg-white/90 p-5 rounded-2xl shadow-xl backdrop-blur-md text-sm pointer-events-none border border-sky-100">
+        <div className="absolute bottom-8 left-8 hidden lg:block bg-white/90 p-5 rounded-2xl shadow-xl backdrop-blur-md text-sm pointer-events-none border border-sky-100 z-10">
           <h4 className="font-bold text-sage mb-3 text-lg border-b pb-1">{isAr ? 'مفتاح الخريطة' : 'Map Legend'}</h4>
           <ul className="space-y-3 font-bold text-gray-700">
             <li className="flex items-center gap-3"><span className="w-4 h-4 bg-[#1e40af] rounded-md shadow-sm"></span> {isAr ? 'المنطقة السكنية (طاقة شمسية)' : 'Residential (Solar)'}</li>
@@ -678,10 +678,10 @@ export default function Home() {
         {/* Scroll Down Button */}
         <motion.button
           onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 15, 0], scale: [1, 1.05, 1] }}
+          initial={{ opacity: 0, x: "-50%" }}
+          animate={{ opacity: 1, y: [0, 15, 0], scale: [1, 1.05, 1], x: "-50%" }}
           transition={{ delay: 1, duration: 1.5, repeat: Infinity }}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-sage/80 hover:bg-sage backdrop-blur-md text-white rounded-full p-4 border-2 border-white/40 transition-all shadow-2xl flex items-center justify-center cursor-pointer"
+          className="absolute bottom-6 left-1/2 z-30 bg-sage/80 hover:bg-sage backdrop-blur-md text-white rounded-full p-4 border-2 border-white/40 transition-all shadow-2xl flex items-center justify-center cursor-pointer"
         >
           <ChevronDown size={48} strokeWidth={2.5} />
         </motion.button>
