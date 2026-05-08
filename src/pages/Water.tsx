@@ -661,10 +661,10 @@ export default function Water() {
         {/* Scroll Down Button */}
         <motion.button
           onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 15, 0], scale: [1, 1.05, 1] }}
+          initial={{ opacity: 0, x: "-50%" }}
+          animate={{ opacity: 1, y: [0, 15, 0], scale: [1, 1.05, 1], x: "-50%" }}
           transition={{ delay: 1, duration: 1.5, repeat: Infinity }}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-sky-600/80 hover:bg-sky-600 backdrop-blur-md text-white rounded-full p-4 border-2 border-white/40 transition-all shadow-2xl flex items-center justify-center cursor-pointer"
+          className="absolute bottom-6 left-1/2 z-30 bg-sky-600/80 hover:bg-sky-600 backdrop-blur-md text-white rounded-full p-4 border-2 border-white/40 transition-all shadow-2xl flex items-center justify-center cursor-pointer"
         >
           <ChevronDown size={48} strokeWidth={2.5} />
         </motion.button>
