@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useLayoutEffect, Suspense } from 'react';
+import { useMemo, useRef, useState, useLayoutEffect, Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html } from '@react-three/drei';
@@ -11,70 +11,79 @@ import { CanvasLoader } from '../components/CanvasLoader';
 // ==========================================
 // 1. Procedural Textures (Memory Optimized)
 // ==========================================
-function useProceduralTextures() {
-  return useMemo(() => {
-    const createTex = (w: number, h: number, render: (ctx: CanvasRenderingContext2D) => void) => {
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      const ctx = c.getContext('2d')!;
-      render(ctx);
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      return tex;
-    };
+type ProceduralTextures = { grass: THREE.CanvasTexture; wood: THREE.CanvasTexture; darkWood: THREE.CanvasTexture; path: THREE.CanvasTexture; soil: THREE.CanvasTexture };
 
-    const grass = createTex(512, 512, (ctx) => {
-      ctx.fillStyle = '#2d5a27'; ctx.fillRect(0, 0, 512, 512);
-      for (let i = 0; i < 50000; i++) {
-        ctx.fillStyle = Math.random() > 0.5 ? '#1e3f1a' : '#3d7536';
-        ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, Math.random() * 5);
-      }
-    });
-    grass.repeat.set(8, 8);
+function createProceduralTextures(): ProceduralTextures {
+  const createTex = (w: number, h: number, render: (ctx: CanvasRenderingContext2D) => void) => {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d')!;
+    render(ctx);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  };
 
-    const wood = createTex(512, 512, (ctx) => {
-      ctx.fillStyle = '#cda47b'; ctx.fillRect(0, 0, 512, 512);
-      ctx.globalAlpha = 0.15;
-      for (let i = 0; i < 300; i++) {
-        ctx.fillStyle = '#5c3a21'; ctx.beginPath();
-        ctx.moveTo(0, Math.random() * 512);
-        ctx.bezierCurveTo(256, Math.random() * 512, 256, Math.random() * 512, 512, Math.random() * 512);
-        ctx.lineWidth = Math.random() * 4; ctx.stroke();
-      }
-    });
+  const grass = createTex(512, 512, (ctx) => {
+    ctx.fillStyle = '#2d5a27'; ctx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 50000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#1e3f1a' : '#3d7536';
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, Math.random() * 5);
+    }
+  });
+  grass.repeat.set(8, 8);
 
-    const darkWood = createTex(256, 256, (ctx) => {
-      ctx.fillStyle = '#6b4423'; ctx.fillRect(0, 0, 256, 256);
-      ctx.fillStyle = '#4a2f18';
-      for(let i=0; i<100; i++) ctx.fillRect(0, Math.random()*256, 256, Math.random()*3);
-    });
+  const wood = createTex(512, 512, (ctx) => {
+    ctx.fillStyle = '#cda47b'; ctx.fillRect(0, 0, 512, 512);
+    ctx.globalAlpha = 0.15;
+    for (let i = 0; i < 300; i++) {
+      ctx.fillStyle = '#5c3a21'; ctx.beginPath();
+      ctx.moveTo(0, Math.random() * 512);
+      ctx.bezierCurveTo(256, Math.random() * 512, 256, Math.random() * 512, 512, Math.random() * 512);
+      ctx.lineWidth = Math.random() * 4; ctx.stroke();
+    }
+  });
 
-    const pathTex = createTex(512, 512, (ctx) => {
-      ctx.fillStyle = '#8b7355'; ctx.fillRect(0, 0, 512, 512);
-      for (let i = 0; i < 40000; i++) {
-        ctx.fillStyle = Math.random() > 0.5 ? '#6e5a42' : '#a88f6f';
-        ctx.fillRect(Math.random() * 512, Math.random() * 512, 1.5, 1.5);
-      }
-    });
-    pathTex.repeat.set(4, 4);
+  const darkWood = createTex(256, 256, (ctx) => {
+    ctx.fillStyle = '#6b4423'; ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = '#4a2f18';
+    for(let i=0; i<100; i++) ctx.fillRect(0, Math.random()*256, 256, Math.random()*3);
+  });
 
-    const soil = createTex(256, 256, (ctx) => {
-      ctx.fillStyle = '#3e2723'; ctx.fillRect(0, 0, 256, 256);
-      for (let i = 0; i < 20000; i++) {
-        ctx.fillStyle = Math.random() > 0.5 ? '#271714' : '#54362f';
-        ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
-      }
-    });
+  const pathTex = createTex(512, 512, (ctx) => {
+    ctx.fillStyle = '#8b7355'; ctx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 40000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#6e5a42' : '#a88f6f';
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, 1.5, 1.5);
+    }
+  });
+  pathTex.repeat.set(4, 4);
 
-    return { grass, wood, darkWood, path: pathTex, soil };
-  }, []);
+  const soil = createTex(256, 256, (ctx) => {
+    ctx.fillStyle = '#3e2723'; ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 20000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#271714' : '#54362f';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+    }
+  });
+
+  return { grass, wood, darkWood, path: pathTex, soil };
+}
+
+// Singleton: textures are created once at module load time, never during render
+let _proceduralTextures: ProceduralTextures | null = null;
+function useProceduralTextures(): ProceduralTextures {
+  if (_proceduralTextures == null) {
+    _proceduralTextures = createProceduralTextures();
+  }
+  return _proceduralTextures;
 }
 
 // ==========================================
 // 2. High-Fidelity 3D Components
 // ==========================================
 
-function WoodenSign({ position, text, textures }: any) {
+function WoodenSign({ position, text, textures }: { position: [number, number, number]; text: string; textures: ProceduralTextures }) {
   return (
     <group position={position}>
       <mesh position={[0, 0.5, 0]} castShadow>
@@ -171,7 +180,7 @@ function DetailedTurbine({ position }: { position: [number, number, number] }) {
   );
 }
 
-function ResidentialHouse({ position, rotation = [0, 0, 0], textures }: any) {
+function ResidentialHouse({ position, rotation = [0, 0, 0], textures }: { position: [number, number, number]; rotation?: [number, number, number]; textures: ProceduralTextures }) {
   // Eaves: Roof is slightly wider and longer than the walls
   const triangleShape = useMemo(() => {
     const shape = new THREE.Shape();
@@ -230,9 +239,9 @@ function ResidentialHouse({ position, rotation = [0, 0, 0], textures }: any) {
   );
 }
 
-function LivestockBarn({ position, textures }: any) {
+function LivestockBarn({ position, rotation = [0, 0, 0], textures }: { position: [number, number, number]; rotation?: [number, number, number]; textures: ProceduralTextures }) {
   return (
-    <group position={position} scale={[0.8, 0.8, 0.8]}>
+    <group position={position} rotation={rotation} scale={[0.8, 0.8, 0.8]}>
       <mesh position={[0, 0.05, 0]} receiveShadow><boxGeometry args={[5, 0.1, 4]} /><meshStandardMaterial map={textures.wood} roughness={1} /></mesh>
       
       {/* Solid Back & Side Walls */}
@@ -268,7 +277,7 @@ function LivestockBarn({ position, textures }: any) {
   );
 }
 
-function HighlyDetailedCow({ position, rotation = [0,0,0], color, spotColor, scale=[0.8,0.8,0.8] }: any) {
+function HighlyDetailedCow({ position, rotation = [0,0,0], color, spotColor, scale=[0.8,0.8,0.8] }: { position: [number, number, number]; rotation?: [number, number, number]; color: string; spotColor: string; scale?: [number, number, number] }) {
   return (
     <group position={position} rotation={rotation} scale={scale}>
       <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[0.8, 0.4, 0.35]} /><meshStandardMaterial color={color} roughness={1} /></mesh>
@@ -294,7 +303,7 @@ function HighlyDetailedCow({ position, rotation = [0,0,0], color, spotColor, sca
   );
 }
 
-function AgriculturalZone({ position, textures, type = 'crops' }: any) {
+function AgriculturalZone({ position, textures, type = 'crops' }: { position: [number, number, number]; textures: ProceduralTextures; type?: string }) {
   // Modular rendering for a single farm plot
   const cropGeom = useMemo(() => {
     if (type === 'wheat') return new THREE.BoxGeometry(0.08, 0.4, 0.08);
@@ -311,33 +320,33 @@ function AgriculturalZone({ position, textures, type = 'crops' }: any) {
 
   useLayoutEffect(() => {
     if (cropRef.current && type !== 'palms') {
+      const d = dummy;
       let i = 0;
-      // High density grid for realistic farming
       const xStep = type === 'wheat' ? 0.2 : 0.4;
       const zStep = type === 'wheat' ? 0.2 : 0.4;
       
       for(let x = -1.5; x <= 1.5; x += xStep) {
         for(let z = -2.1; z <= 2.1; z += zStep) {
-          if (i >= 400) break; // Safety limit
+          if (i >= 400) break;
           
-          dummy.position.set(x + (Math.random()-0.5)*0.1, 0.1, z + (Math.random()-0.5)*0.1);
+          d.position.set(x + (Math.random()-0.5)*0.1, 0.1, z + (Math.random()-0.5)*0.1);
           
           if (type === 'wheat') {
-            dummy.scale.setScalar(0.8 + Math.random() * 0.5);
-            dummy.rotation.set(0, Math.random() * Math.PI, 0); // Wheat stands upright
+            d.scale.setScalar(0.8 + Math.random() * 0.5);
+            d.rotation.set(0, Math.random() * Math.PI, 0);
           } else {
-            dummy.scale.setScalar(0.8 + Math.random() * 0.4);
-            dummy.rotation.set(Math.random(), Math.random(), Math.random()); // Cabbages/veggies are random
+            d.scale.setScalar(0.8 + Math.random() * 0.4);
+            d.rotation.set(Math.random(), Math.random(), Math.random());
           }
           
-          dummy.updateMatrix();
-          cropRef.current.setMatrixAt(i++, dummy.matrix);
+          d.updateMatrix();
+          cropRef.current.setMatrixAt(i++, d.matrix);
         }
       }
       cropRef.current.count = i;
       cropRef.current.instanceMatrix.needsUpdate = true;
     }
-  }, [type]);
+  }, [type, dummy]);
 
   return (
     <group position={position}>
@@ -377,7 +386,7 @@ function AgriculturalZone({ position, textures, type = 'crops' }: any) {
   );
 }
 
-function ComplexWaterTank({ position, textures, isRaining }: any) {
+function ComplexWaterTank({ position, textures, isRaining }: { position: [number, number, number]; textures: ProceduralTextures; isRaining: boolean }) {
   const waterRef = useRef<THREE.Mesh>(null);
   const rippleRef = useRef<THREE.Mesh>(null);
   
@@ -440,23 +449,29 @@ function RainSystem({ isRaining }: { isRaining: boolean }) {
   const dropGeom = useMemo(() => new THREE.BoxGeometry(0.03, 0.8, 0.03), []);
   const dropMat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#7dd3fc', transparent: true, opacity: 0.5 }), []);
   const dropsRef = useRef<THREE.InstancedMesh>(null);
-  const count = 500; // Reduced from 2000 for massive mobile performance boost
+  const count = 500;
   
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const speeds = useMemo(() => new Float32Array(count).map(() => 0.2 + Math.random() * 0.3), []);
-  const positions = useMemo(() => new Float32Array(count * 3).map((_, i) => {
-    if(i%3 === 0) return (Math.random() - 0.5) * 32; // x
-    if(i%3 === 1) return Math.random() * 20; // y
-    return (Math.random() - 0.5) * 20; // z
-  }), []);
+  // Use refs for mutable rain data — avoids React compiler "cannot modify useMemo value" error
+  const speedsRef = useRef<Float32Array>(new Float32Array(0));
+  const positionsRef = useRef<Float32Array>(new Float32Array(0));
+
+  useEffect(() => {
+    speedsRef.current = new Float32Array(count).map(() => 0.2 + Math.random() * 0.3);
+    positionsRef.current = new Float32Array(count * 3).map((_, i) => {
+      if(i%3 === 0) return (Math.random() - 0.5) * 32; // x
+      if(i%3 === 1) return Math.random() * 20;          // y
+      return (Math.random() - 0.5) * 20;                // z
+    });
+  }, []);
 
   useFrame(() => {
     if (!isRaining || !dropsRef.current) return;
+    const positions = positionsRef.current;
+    const speeds = speedsRef.current;
     for (let i = 0; i < count; i++) {
-      positions[i*3 + 1] -= speeds[i]; // move y down
-      if (positions[i*3 + 1] < 0) {
-        positions[i*3 + 1] = 20; // reset to top
-      }
+      positions[i*3 + 1] -= speeds[i];
+      if (positions[i*3 + 1] < 0) positions[i*3 + 1] = 20;
       dummy.position.set(positions[i*3], positions[i*3+1], positions[i*3+2]);
       dummy.updateMatrix();
       dropsRef.current.setMatrixAt(i, dummy.matrix);
@@ -468,27 +483,35 @@ function RainSystem({ isRaining }: { isRaining: boolean }) {
   return <instancedMesh ref={dropsRef} args={[dropGeom, dropMat, count]} />;
 }
 
+// Pipe component defined at module level to avoid "cannot create components during render"
+type PipeProps = {
+  pos: [number, number, number];
+  rot: [number, number, number];
+  scaleY: number;
+  geom: THREE.CylinderGeometry;
+  material: THREE.MeshStandardMaterial;
+};
+function Pipe({ pos, rot, scaleY, geom, material }: PipeProps) {
+  return <mesh position={pos} rotation={rot} scale={[1, scaleY, 1]} castShadow geometry={geom} material={material} />;
+}
+
 // Clean and thin pipe network connecting resources
 function MacroPipeNetwork() {
   const material = useMemo(() => new THREE.MeshStandardMaterial({ color: '#94a3b8', roughness: 0.3, metalness: 0.8 }), []);
   const geom = useMemo(() => new THREE.CylinderGeometry(0.025, 0.025, 1, 16), []);
-  
-  const Pipe = ({ pos, rot, scaleY }: any) => (
-    <mesh position={pos} rotation={rot} scale={[1, scaleY, 1]} castShadow geometry={geom} material={material} />
-  );
 
   return (
     <group position={[0, -0.01, 0]}>
       {/* Tank (-12, 6) to Farm (0, 6) */}
-      <Pipe pos={[-6, 0, 6.2]} rot={[0, 0, Math.PI/2]} scaleY={12} />
+      <Pipe pos={[-6, 0, 6.2]} rot={[0, 0, Math.PI/2]} scaleY={12} geom={geom} material={material} />
       
       {/* Tank up to Homes */}
-      <Pipe pos={[-12, 0, 3]} rot={[Math.PI/2, 0, 0]} scaleY={6} />
-      <Pipe pos={[-7, 0, 0]} rot={[0, 0, Math.PI/2]} scaleY={10} />
+      <Pipe pos={[-12, 0, 3]} rot={[Math.PI/2, 0, 0]} scaleY={6} geom={geom} material={material} />
+      <Pipe pos={[-7, 0, 0]} rot={[0, 0, Math.PI/2]} scaleY={10} geom={geom} material={material} />
       
       {/* Connect to Home 3 and 4 */}
-      <Pipe pos={[-10, 0, 0.5]} rot={[Math.PI/2, 0, 0]} scaleY={1} />
-      <Pipe pos={[-2, 0, 1]} rot={[Math.PI/2, 0, 0]} scaleY={2} />
+      <Pipe pos={[-10, 0, 0.5]} rot={[Math.PI/2, 0, 0]} scaleY={1} geom={geom} material={material} />
+      <Pipe pos={[-2, 0, 1]} rot={[Math.PI/2, 0, 0]} scaleY={2} geom={geom} material={material} />
     </group>
   );
 }
@@ -791,9 +814,9 @@ export default function Home() {
               </p>
 
               {/* Tooltip for long descriptions */}
-              {((member as any).descAr || (member as any).descEn) && (
+              {((member as { descAr?: string; descEn?: string }).descAr || (member as { descAr?: string; descEn?: string }).descEn) && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-60 bg-slate-800 text-white text-xs p-3 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 pointer-events-none shadow-2xl leading-relaxed z-[100]">
-                  {isAr ? (member as any).descAr : (member as any).descEn}
+                  {isAr ? (member as { descAr?: string; descEn?: string }).descAr : (member as { descAr?: string; descEn?: string }).descEn}
                   {/* Tooltip Arrow */}
                   <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
                 </div>

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './i18n';
-import { Globe, Leaf, Menu, X } from 'lucide-react';
+import { Globe, Leaf, Menu, X, Volume2, VolumeX } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import Home from './pages/Home';
@@ -22,7 +22,7 @@ const navItems = [
   { path: '/desert', key: 'nav.desert', icon: '🌬️' },
 ];
 
-function NavBar() {
+function NavBar({ isMuted, toggleMute }: { isMuted: boolean, toggleMute: () => void }) {
   const { t, i18n } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -39,9 +39,6 @@ function NavBar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
 
   return (
     <nav
@@ -84,6 +81,15 @@ function NavBar() {
           {/* Lang + Mobile toggle */}
           <div className="flex items-center gap-2">
             <button
+              onClick={toggleMute}
+              className={`flex items-center justify-center p-2 rounded-full transition-all ${
+                isMuted ? 'bg-gray-200 text-gray-500' : 'bg-green-100 text-sage shadow-inner'
+              }`}
+              title={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} className="animate-pulse" />}
+            </button>
+            <button
               onClick={toggleLanguage}
               id="lang-toggle-btn"
               className="flex items-center gap-1.5 bg-sage text-white px-3 py-1.5 rounded-full text-sm font-bold hover:bg-green-700 transition-colors shadow-sm"
@@ -116,6 +122,7 @@ function NavBar() {
                   <Link
                     key={item.path}
                     to={item.path}
+                    onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
                       location.pathname === item.path
                         ? 'bg-sage text-white'
@@ -201,16 +208,55 @@ function AnimatedRoutes() {
 
 function App() {
   const { i18n } = useTranslation();
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
 
+  // Handle Autoplay Policy
+  useEffect(() => {
+    const playAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {
+          // Autoplay was prevented
+          console.log("Autoplay prevented. Waiting for user interaction.");
+        });
+      }
+    };
+
+    // Try to play immediately
+    playAudio();
+
+    // Also try to play on first interaction if blocked
+    const handleFirstClick = () => {
+      playAudio();
+      window.removeEventListener('click', handleFirstClick);
+    };
+    window.addEventListener('click', handleFirstClick);
+
+    return () => window.removeEventListener('click', handleFirstClick);
+  }, []);
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !audioRef.current.muted;
+      setIsMuted(audioRef.current.muted);
+    }
+  };
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-cream font-cairo">
-        <NavBar />
+        <audio
+          ref={audioRef}
+          src="/background-music.mp3"
+          loop
+          autoPlay
+        />
+        <NavBar isMuted={isMuted} toggleMute={toggleMute} />
         <main className="flex-grow">
           <AnimatedRoutes />
         </main>
